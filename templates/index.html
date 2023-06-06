@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Chipper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <script>
+        function copyToClipboard() {
+            const logConfig = document.getElementById('log_config');
+            logConfig.select();
+            document.execCommand('copy');
+        }
+
+
+        $(document).ready(function () {
+            $("#generate-config").on("click", function () {
+                var sampleLogs = $("#sample_logs").val();
+
+                $.ajax({
+                    url: '/generate-config',
+                    method: 'POST',
+                    data: {
+                        sample_logs: sampleLogs
+                    },
+                    success: function (response) {
+                        $("#log_config").val(response.config);
+                    }
+                });
+            });
+
+            $("#generate-logs").on("click", function () {
+                var config = $("#log_config").val();
+
+                $.ajax({
+                    url: '/generate_logs',
+                    method: 'POST',
+                    data: {
+                        config: config
+                    },
+                    success: function (response) {
+                        $("#example_logs").val(response.generated_logs);
+                    }
+                });
+            });
+            // Save config event handler
+            $("#save-config").on("click", function () {
+                var config = $("#log_config").val();
+
+                $.ajax({
+                    url: '/save-config',
+                    method: 'POST',
+                    data: {
+                        config: config
+                    },
+                    success: function (response) {
+                        if (response.error) {
+                            alert("Error saving config: " + response.error);
+                        } else {
+                            alert("Config saved successfully");
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert("Error saving config: " + errorThrown);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">> Log_Chipper</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Template Maker</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Current Templates</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Forwarding</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="mt-5 mb-5">Template Maker</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="sample_logs">Sample Logs</label>
+                        <textarea class="form-control" id="sample_logs" name="sample_logs"
+                            rows="10">{{ sample_logs }}</textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary mb-3" id="generate-config">Generate Config</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="log_config">Log Template Config</label>
+                    <textarea class="form-control" id="log_config" name="log_config" rows="10">{{ config }}</textarea>
+                </div>
+                <button id="save-config" class="btn btn-primary mb-3">Save</button>
+                <button type="button" id="generate-logs" class="btn btn-primary mb-3">Generate Logs</button>
+                <button type="button" class="btn btn-secondary mb-3" onclick="copyToClipboard()">Copy</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="example_logs">Generated Logs</label>
+                    <textarea class="form-control" id="example_logs" rows="10" readonly>
+                        {{ generated_logs }}
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
