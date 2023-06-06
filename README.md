@@ -2,6 +2,7 @@
 Log Chipper is an application designed as a proof-of-concept to utilize LLMs (Language Model Models) for generating test logs based on a small set of provided sample logs.
 
 **YouTube Intro**
+
 [![Youtube Intro](https://img.youtube.com/vi/ygBcdcMeJPo/0.jpg)](https://www.youtube.com/watch?v=ygBcdcMeJPo)
 
 The app currently leverages GPT3.5, but there are plans to incorporate additional compatibility in the future.
