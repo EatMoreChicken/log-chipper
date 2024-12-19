@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Selection Extractor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+        }
+        
+        .highlight {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .highlight:hover {
+            filter: brightness(95%);
+        }
+
+        #input-area {
+            white-space: pre-wrap;
+            min-height: 200px;
+        }
+
+        .truncate-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Pastel Colors */
+        .color-0 { background-color: #FFB3B3; }
+        .color-1 { background-color: #BAFFC9; }
+        .color-2 { background-color: #BAE1FF; }
+        .color-3 { background-color: #FFFFBA; }
+        .color-4 { background-color: #FFB3F7; }
+        .color-5 { background-color: #B3FFE0; }
+
+        .highlight-text {
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Text Selection Extractor</h1>
+        
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Instructions</h3>
+            <ol class="list-decimal list-inside text-gray-600 space-y-2">
+                <li>Enter or paste your text in the box below</li>
+                <li>Select/highlight the portions you want to extract</li>
+                <li>Click on any highlighted section to remove the highlight</li>
+                <li>Click "Submit" to process your selections</li>
+            </ol>
+        </div>
+
+        <div id="input-area" contenteditable="true" 
+             class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        
+        <button onclick="processSelections()" 
+                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Submit
+        </button>
+        
+        <div id="result-table" class="hidden mt-8">
+            <h3 class="text-lg font-medium text-gray-700 mb-4">Extracted Values</h3>
+            <div>
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Extracted Value</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Field Name</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="extraction-table">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selections = [];
+        let colorIndex = 0;
+        const totalColors = 6;
+        
+        document.getElementById('input-area').addEventListener('mouseup', function() {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.className = `highlight color-${colorIndex}`;
+                span.dataset.colorIndex = colorIndex;
+                span.onclick = removeHighlight;
+                range.surroundContents(span);
+                selections.push({
+                    text: selection.toString(),
+                    colorIndex: colorIndex
+                });
+                colorIndex = (colorIndex + 1) % totalColors;
+                selection.removeAllRanges();
+            }
+        });
+
+        function removeHighlight(event) {
+            const span = event.target;
+            const text = span.textContent;
+            const textNode = document.createTextNode(text);
+            span.parentNode.replaceChild(textNode, span);
+        }
+
+        function processSelections() {
+            const tableBody = document.querySelector('#extraction-table');
+            tableBody.innerHTML = '';
+            
+            const highlights = document.querySelectorAll('.highlight');
+            highlights.forEach(highlight => {
+                const row = document.createElement('tr');
+                const colorClass = `color-${highlight.dataset.colorIndex}`;
+                row.innerHTML = `
+                    <td class="px-6 py-4 truncate-cell">
+                        <span class="highlight-text ${colorClass}">${highlight.textContent}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="text" placeholder="Enter field name" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            document.getElementById('result-table').classList.remove('hidden');
+        }
+        
+        window.onload = function() {
+            const sampleLog = `192.168.1.100 - frank [10/Dec/2024:13:55:36 +0000] "GET /server-status HTTP/1.1" 200 2326 "http://example.com/index.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"`;
+            document.getElementById('input-area').textContent = sampleLog;
+        }
+    </script>
+</body>
+</html>
