@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Selection Extractor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        #input-area {
+            width: 100%;
+            min-height: 200px;
+            margin: 20px 0;
+            padding: 10px;
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .highlight {
+            background-color: yellow;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .highlight:hover {
+            background-color: #ffeb3b;
+        }
+        
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        button:hover {
+            background-color: #0052a3;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f5f5f5;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        #result-table {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Selection Extractor</h1>
+    
+    <div>
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Enter or paste your text in the box below</li>
+            <li>Select/highlight the portions you want to extract</li>
+            <li>Click on any highlighted section to remove the highlight</li>
+            <li>Click "Submit" to process your selections</li>
+        </ol>
+    </div>
+
+    <div id="input-area" contenteditable="true"></div>
+    
+    <button onclick="processSelections()">Submit</button>
+    
+    <div id="result-table">
+        <h3>Extracted Values</h3>
+        <table id="extraction-table">
+            <thead>
+                <tr>
+                    <th>Extracted Value</th>
+                    <th>Field Name</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        let selections = [];
+        
+        document.getElementById('input-area').addEventListener('mouseup', function() {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.className = 'highlight';
+                span.onclick = removeHighlight;
+                range.surroundContents(span);
+                selections.push(selection.toString());
+                selection.removeAllRanges();
+            }
+        });
+
+        function removeHighlight(event) {
+            const span = event.target;
+            // Get the text content
+            const text = span.textContent;
+            // Create a text node
+            const textNode = document.createTextNode(text);
+            // Replace the span with the text node
+            span.parentNode.replaceChild(textNode, span);
+        }
+
+        function processSelections() {
+            const tableBody = document.querySelector('#extraction-table tbody');
+            tableBody.innerHTML = '';
+            
+            // Get all highlighted spans
+            const highlights = document.querySelectorAll('.highlight');
+            highlights.forEach(highlight => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${highlight.textContent}</td>
+                    <td><input type="text" placeholder="Enter field name"></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            document.getElementById('result-table').style.display = 'block';
+        }
+        
+        // Initialize with sample JSON
+        window.onload = function() {
+            const sampleLog = `192.168.1.100 - frank [10/Dec/2024:13:55:36 +0000] "GET /server-status HTTP/1.1" 200 2326 "http://example.com/index.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"`;
+            document.getElementById('input-area').textContent = sampleLog;
+        }
+    </script>
+</body>
+</html>
