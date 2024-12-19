@@ -7,6 +7,10 @@ Log Chipper is an application designed as a proof-of-concept to utilize LLMs (La
 
 The app currently leverages GPT3.5, but there are plans to incorporate additional compatibility in the future.
 
+**New Extractor**
+
+![image](https://github.com/user-attachments/assets/46b0c9c4-53e5-4e0a-bc21-12f8f0928d2b)
+
 ## How it Works
 ### Old Method
 The old method utilizes LLMs to analyze the sample log set and generate test logs through the following process:
